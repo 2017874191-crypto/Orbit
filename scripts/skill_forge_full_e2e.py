@@ -43,18 +43,18 @@ def _load_dotenv(path: Path) -> None:
 
 _load_dotenv(_REPO_ROOT / ".env")
 
-from pico.context_engine.base import AssemblyContext
-from pico.context_engine.segments.skills import SkillsSegmentBuilder
-from pico.memory_engine.base import TokenBudget
-from pico.memory_engine.skill_forge import (
+from orbit.context_engine.base import AssemblyContext
+from orbit.context_engine.segments.skills import SkillsSegmentBuilder
+from orbit.memory_engine.base import TokenBudget
+from orbit.memory_engine.skill_forge import (
     LLMGateFilter,
     LocalSkillSource,
     QueryRewriter,
     SkillForgeRouter,
 )
-from pico.memory_engine.skill_local.local_pool import LocalPool
-from pico.memory_engine.skill_local.registry import SkillRegistry
-from pico.providers.litellm_provider import LiteLLMProvider
+from orbit.memory_engine.skill_local.local_pool import LocalPool
+from orbit.memory_engine.skill_local.registry import SkillRegistry
+from orbit.providers.litellm_provider import LiteLLMProvider
 
 # 固件技能与 benchmarks/skill_evals 查询结构相同，其中一个带有捆绑引用文件，用于测试引用水合。
 _SKILLS = [

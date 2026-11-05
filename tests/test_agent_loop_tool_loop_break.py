@@ -12,12 +12,12 @@ from pathlib import Path
 
 import pytest
 
-from pico.agent.loop import AgentLoop
-from pico.agent.loop.main import _is_hard_tool_failure
-from pico.agent.tools.base import ToolResult
-from pico.providers.base import LLMProvider, LLMResponse, ToolCallRequest
-from pico.spine.message import ChatType, Source
-from pico.spine.turn import Origin, TurnRequest
+from orbit.agent.loop import AgentLoop
+from orbit.agent.loop.main import _is_hard_tool_failure
+from orbit.agent.tools.base import ToolResult
+from orbit.providers.base import LLMProvider, LLMResponse, ToolCallRequest
+from orbit.spine.message import ChatType, Source
+from orbit.spine.turn import Origin, TurnRequest
 
 
 @pytest.fixture

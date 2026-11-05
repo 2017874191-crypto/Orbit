@@ -21,12 +21,12 @@ interface HistoryModule {
 }
 
 let history: HistoryModule
-let picoDir: string
+let orbitDir: string
 
 beforeAll(async () => {
-  picoDir = mkdtempSync(join(tmpdir(), 'pico-hist-'))
+  orbitDir = mkdtempSync(join(tmpdir(), 'orbit-hist-'))
 
-  vi.stubEnv('PICO_HOME', picoDir)
+  vi.stubEnv('ORBIT_HOME', orbitDir)
   history = await import('../lib/history.js')
 })
 
@@ -51,7 +51,7 @@ describe('input history store (backs cycleHistory)', () => {
     expect(entries.at(-1)).toBe('third command')
     // ……再走到索引 0 的最旧项。
     expect(entries[0]).toBe('first command')
-    expect(existsSync(join(picoDir, '.pico_history'))).toBe(true)
+    expect(existsSync(join(orbitDir, '.orbit_history'))).toBe(true)
   })
 
   it('deduplicates a repeat of the most recent entry', () => {

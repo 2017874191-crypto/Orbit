@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from pico.agent.loop import AgentLoop
+from orbit.agent.loop import AgentLoop
 
 
 class _FakeSkills:

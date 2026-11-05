@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-export const getPicoHome = (env: NodeJS.ProcessEnv = process.env) => env.PICO_HOME?.trim() || join(homedir(), '.pico')
+export const getOrbitHome = (env: NodeJS.ProcessEnv = process.env) => env.ORBIT_HOME?.trim() || join(homedir(), '.orbit')
 
-export const getPicoHomeLabel = (env: NodeJS.ProcessEnv = process.env) => env.PICO_HOME?.trim() || '~/.pico'
+export const getOrbitHomeLabel = (env: NodeJS.ProcessEnv = process.env) => env.ORBIT_HOME?.trim() || '~/.orbit'

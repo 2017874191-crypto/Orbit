@@ -21,7 +21,7 @@
 - Shell：
 - Python：
 - Node.js：
-- Pico 版本或 Commit：
+- Orbit 版本或 Commit：
 - 安装方式：
 
 ## 复现步骤

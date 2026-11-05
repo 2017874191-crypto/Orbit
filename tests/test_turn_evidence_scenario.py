@@ -6,7 +6,7 @@ delivery exhaustion -- into an isolated evidence root, then leaves the
 artifacts on disk for ``scripts/verify_turn_evidence.py`` to join.
 
 The root is always pytest's ``tmp_path``: the suite's autouse home-isolation
-fixture strips every ``PICO_*`` variable, so an environment handshake would be
+fixture strips every ``ORBIT_*`` variable, so an environment handshake would be
 both unreliable and a hole in that guard. The verifier instead points
 ``--basetemp`` at its own output root and reads :data:`MANIFEST_FILENAME`,
 written beside it, to learn the exact directory this run used.
@@ -24,17 +24,17 @@ from pathlib import Path
 
 import pytest
 
-from pico.agent.loop.main import ProviderTurnError
-from pico.call_efficiency import CallEfficiency
-from pico.providers.base import LLMResponse
-from pico.spine import ChatType, Origin, Source, Text, TurnOutcome, TurnRequest, Usage
-from pico.spine import delivery as delivery_mod
-from pico.spine.delivery import Capabilities, DeliveryHub, make_hub_sink
-from pico.spine.scheduler import Lane, OriginPools
-from pico.token_wise.base import UsageSnapshot
-from pico.token_wise.usage_tracker import UsageTracker
-from pico.tracing import spans as _spans
-from pico.tracing import trace
+from orbit.agent.loop.main import ProviderTurnError
+from orbit.call_efficiency import CallEfficiency
+from orbit.providers.base import LLMResponse
+from orbit.spine import ChatType, Origin, Source, Text, TurnOutcome, TurnRequest, Usage
+from orbit.spine import delivery as delivery_mod
+from orbit.spine.delivery import Capabilities, DeliveryHub, make_hub_sink
+from orbit.spine.scheduler import Lane, OriginPools
+from orbit.token_wise.base import UsageSnapshot
+from orbit.token_wise.usage_tracker import UsageTracker
+from orbit.tracing import spans as _spans
+from orbit.tracing import trace
 
 COMPLETED = "scenario:completed"
 TOOL_FAILURE = "scenario:tool_failure"
@@ -62,8 +62,8 @@ MANIFEST_FILENAME = "turn-evidence-manifest.json"
 def evidence_root(tmp_path, monkeypatch) -> Path:
     root = Path(tmp_path)
     root.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setenv("PICO_TRACING", "1")
-    monkeypatch.setenv("PICO_TRACING_DIR", str(root / "traces"))
+    monkeypatch.setenv("ORBIT_TRACING", "1")
+    monkeypatch.setenv("ORBIT_TRACING_DIR", str(root / "traces"))
     monkeypatch.setattr(delivery_mod, "_RETRY_BASE_DELAY", 0)
     _spans._store = None
 

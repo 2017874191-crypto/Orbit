@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from pico.plugin import PluginContext, ServiceLocator
+from orbit.plugin import PluginContext, ServiceLocator
 
 
 class TestServiceLocator:
@@ -38,10 +38,10 @@ class TestPluginContext:
         )
         assert isinstance(ctx.logger, logging.Logger)
 
-        assert ctx.logger.name.startswith("pico.plugin")
+        assert ctx.logger.name.startswith("orbit.plugin")
 
     def test_explicit_logger(self, tmp_path: Path) -> None:
-        my_logger = logging.getLogger("pico.plugin.example")
+        my_logger = logging.getLogger("orbit.plugin.example")
         ctx = PluginContext(
             config={},
             services=ServiceLocator(workspace=tmp_path),

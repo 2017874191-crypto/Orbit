@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from pico.routing.router import ModelRouter
-from pico.routing.types import ModelScore, SelectionResult
+from orbit.routing.router import ModelRouter
+from orbit.routing.types import ModelScore, SelectionResult
 
 
 def _result(primary: str, fallbacks: list[str]) -> SelectionResult:

@@ -70,7 +70,7 @@ Orbit 会写入 `memory.backend = null`，不会把缺失的 Backend 伪装成�
 向导完成后：
 
 ```bash
-pico
+orbit
 orbit run -m "说明这个仓库的主请求路径"
 orbit doctor --probe
 ```
@@ -128,14 +128,14 @@ orbit gateway --workspace "$PWD" --verbose
 
 | 范围 | 默认位置 |
 | --- | --- |
-| 全局配置与 Runtime 数据 | `~/.pico` |
+| 全局配置与 Runtime 数据 | `~/.orbit` |
 | 前台项目 | 当前目录 |
-| 前台项目状态 | `~/.pico/projects/<project-id>` |
-| Gateway Workspace | 显式传入 `--workspace`，否则使用 `~/.pico/workspace` |
+| 前台项目状态 | `~/.orbit/projects/<project-id>` |
+| Gateway Workspace | 显式传入 `--workspace`，否则使用 `~/.orbit/workspace` |
 
 正常启动会把 Orbit 状态放在仓库之外。可执行 Plugin 只从 Orbit 内置目录、操作人员
-管理的 `~/.pico/plugins/` 和已安装的 `pico.plugins` entry point 中发现。
-仓库里的 `.pico/plugins/` 不会成为自动启动来源。
+管理的 `~/.orbit/plugins/` 和已安装的 `orbit.plugins` entry point 中发现。
+仓库里的 `.orbit/plugins/` 不会成为自动启动来源。
 
 修改 Backend 或把安装交给其他操作人员前，请先阅读
 [Memory 边界](docs/onboarding/memory.zh-CN.md)和
@@ -167,8 +167,8 @@ uv sync --frozen --extra dev --dev
 npm ci
 npm ci --prefix ui-tui
 make check
-make picobench-smoke
-PICO_RELEASE_OUTPUT=/absolute/empty/output make release-dist
+make orbitbench-smoke
+ORBIT_RELEASE_OUTPUT=/absolute/empty/output make release-dist
 ```
 
 Orbit 仍处于 pre-1.0，接口可能变化。`make check` 验证保留的发布树，不能替代真实

@@ -1,5 +1,5 @@
-from pico.channels.outlet import ChannelOutletAdapter
-from pico.spine import (
+from orbit.channels.outlet import ChannelOutletAdapter
+from orbit.spine import (
     ChatType,
     MediaOut,
     Notice,
@@ -11,8 +11,8 @@ from pico.spine import (
     ToolEvent,
     ToolPhase,
 )
-from pico.spine.delivery import Outlet
-from pico.spine.message import Media
+from orbit.spine.delivery import Outlet
+from orbit.spine.message import Media
 
 
 def _src(channel="telegram", chat_id="c1") -> Source:

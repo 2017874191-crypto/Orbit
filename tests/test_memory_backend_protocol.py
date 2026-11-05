@@ -6,7 +6,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from pico.memory_engine import Memory, MemoryBackend
+from orbit.memory_engine import Memory, MemoryBackend
 
 # ---------------------------------------------------------------------------
 

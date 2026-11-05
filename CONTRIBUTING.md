@@ -5,7 +5,7 @@
 
 ## 从哪里开始
 
-1. 在 [Gitee Issues](https://gitee.com/htxoffical/orbit-harness/issues) 中选择带有
+1. 在 [Gitee Issues](https://github.com/2017874191-crypto/Orbit/issues) 中选择带有
    `good-first-issue` 或 `help-wanted` 标签的任务。
 2. 阅读 Issue 中的目标分支、范围、相关文件、非目标和验收命令。
 3. 在 Issue 下留言：`我来认领，预计在 7 天内提交 PR。`

@@ -74,7 +74,7 @@ dev = [
 eval = []
 
 [project.scripts]
-orbit = "pico.cli.commands:run"
+orbit = "orbit.cli.commands:run"
 
 [build-system]
 requires = ["hatchling"]
@@ -84,10 +84,10 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["pico"]
+packages = ["orbit"]
 
-# 预构建、自包含的 TUI 包 ui-tui/dist/entry.js 会以 pico/ui-tui/dist 路径打入
-# wheel，使 `uv tool install` 无需源码检出即可得到可用的 `pico`。下方自定义构建
+# 预构建、自包含的 TUI 包 ui-tui/dist/entry.js 会以 orbit/ui-tui/dist 路径打入
+# wheel，使 `uv tool install` 无需源码检出即可得到可用的 `orbit`。下方自定义构建
 # 钩子 hatch_build.py 会按条件加入该文件；静态 force-include 在被 Git 忽略的
 # dist/ 缺失时会硬失败，破坏 `git clone && uv sync`。发布构建必须先运行
 # `npm ci --prefix ui-tui && make build-tui`。
@@ -96,21 +96,21 @@ path = "hatch_build.py"
 
 [tool.hatch.build]
 include = [
-    "pico/**/*.py",
-    "pico/plugin/**/pico-plugin.toml",
-    "pico/templates/**/*.md",
-    "pico/skills/**/*.md",
-    "pico/skills/**/*.sh",
+    "orbit/**/*.py",
+    "orbit/plugin/**/orbit-plugin.toml",
+    "orbit/templates/**/*.md",
+    "orbit/skills/**/*.md",
+    "orbit/skills/**/*.sh",
     # 追踪仪表板查看器（无依赖 Node 服务端加静态客户端）。
-    "pico/tracing/viewer/**/*.js",
-    "pico/tracing/viewer/**/*.css",
-    "pico/tracing/viewer/**/*.html",
-    "pico/tracing/viewer/**/*.json",
+    "orbit/tracing/viewer/**/*.js",
+    "orbit/tracing/viewer/**/*.css",
+    "orbit/tracing/viewer/**/*.html",
+    "orbit/tracing/viewer/**/*.json",
 ]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "pico/",
+    "orbit/",
     "hatch_build.py",
     "README.md",
     "LICENSE",
@@ -149,22 +149,22 @@ ignore = ["E501"]
 
 # 追踪探针工厂以目标类为参数，并为可读性沿用类名，例如
 # `def _install_llm(LLMProvider: type)`。
-"pico/tracing/instrument.py" = ["N803"]
+"orbit/tracing/instrument.py" = ["N803"]
 
 # CLI 启动顺序与延迟导入，长期接受。
-"pico/cli/commands.py" = ["E402"]
-"pico/cli/cron_commands.py" = ["E402"]
+"orbit/cli/commands.py" = ["E402"]
+"orbit/cli/cron_commands.py" = ["E402"]
 
 # 其他延迟导入或启动顺序导入，允许使用。
-"pico/eval_engine/engine.py" = ["E402"]
-"pico/memory_engine/skill_local/registry.py" = ["E402"]
+"orbit/eval_engine/engine.py" = ["E402"]
+"orbit/memory_engine/skill_local/registry.py" = ["E402"]
 "scripts/skill_forge_full_e2e.py" = ["E402"]
 
 # 断言；转换或保留的取舍在 v2 中跟踪。
-"pico/agent/subagent/manager.py" = ["S101"]
-"pico/cli/doctor_commands.py" = ["S101"]
-"pico/cli/onboard_commands.py" = ["S101"]
-"pico/memory_engine/contract_test.py" = ["S101"]
+"orbit/agent/subagent/manager.py" = ["S101"]
+"orbit/cli/doctor_commands.py" = ["S101"]
+"orbit/cli/onboard_commands.py" = ["S101"]
+"orbit/memory_engine/contract_test.py" = ["S101"]
 
 # scripts/：开发工具，允许使用部分路径子进程和断言。
 "scripts/check_commit_file.py" = ["S607"]
@@ -174,17 +174,17 @@ ignore = ["E501"]
 # evolver 与 appworld 基准按设计使用 Git/Bash 子进程驱动（S607）；K 是 SOP 领域中
 # 每任务试验次数的术语（N803/N806）；*_PASS/*_TOKEN 常量是结果标签和信标标记，
 # 不是凭据（S105）；断言与上方转换或保留批次一起跟踪（S101）。
-"pico/evolver/tree/git_ops.py" = ["S607"]
-"pico/evolver/launch/config.py" = ["S607"]
-"pico/evolver/launch/contract.py" = ["S607"]
-"pico/evolver/launch/runner.py" = ["S607"]
-"pico/evolver/orchestrator/nodes/semantic.py" = ["S101"]
-"pico/evolver/scheduler/cold_start_bandit.py" = ["N803", "N806"]
-"pico/evolver/scheduler/tree_aware_bandit.py" = ["N803"]
-"pico/evolver/scheduler/tree_loader.py" = ["S101"]
-"pico/evolver/analysis/stability_bucket.py" = ["S105"]
-"pico/evolver/applier/beacon_guard.py" = ["S105"]
-"pico/evolver/judge/prompts.py" = ["S105"]
+"orbit/evolver/tree/git_ops.py" = ["S607"]
+"orbit/evolver/launch/config.py" = ["S607"]
+"orbit/evolver/launch/contract.py" = ["S607"]
+"orbit/evolver/launch/runner.py" = ["S607"]
+"orbit/evolver/orchestrator/nodes/semantic.py" = ["S101"]
+"orbit/evolver/scheduler/cold_start_bandit.py" = ["N803", "N806"]
+"orbit/evolver/scheduler/tree_aware_bandit.py" = ["N803"]
+"orbit/evolver/scheduler/tree_loader.py" = ["S101"]
+"orbit/evolver/analysis/stability_bucket.py" = ["S105"]
+"orbit/evolver/applier/beacon_guard.py" = ["S105"]
+"orbit/evolver/judge/prompts.py" = ["S105"]
 "benchmarks/appworld/evolve/adapter.py" = ["N803", "S105"]
 "benchmarks/appworld/evolve/editor.py" = ["N806"]
 "benchmarks/appworld/evolve/sandbox.py" = ["S607"]

@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from pico.agent.tools.message import MessageTool
-from pico.evolver.judge.prompts import JUDGE_SYSTEM_PROMPT, PROPOSABLE_WHERE
-from pico.evolver.judge.schema import PatchWhere
+from orbit.agent.tools.message import MessageTool
+from orbit.evolver.judge.prompts import JUDGE_SYSTEM_PROMPT, PROPOSABLE_WHERE
+from orbit.evolver.judge.schema import PatchWhere
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -25,17 +25,17 @@ def test_model_facing_surfaces_exclude_removed_capabilities() -> None:
         assert removed not in rendered
 
 
-def test_candidate_prompt_uses_current_pico_paths() -> None:
+def test_candidate_prompt_uses_current_orbit_paths() -> None:
     assert "src/domains/" not in JUDGE_SYSTEM_PROMPT
     assert "memory_engine/everos/" not in JUDGE_SYSTEM_PROMPT
-    assert "pico/plugin/memory/everos/" not in JUDGE_SYSTEM_PROMPT
+    assert "orbit/plugin/memory/everos/" not in JUDGE_SYSTEM_PROMPT
     assert "public backend contract" in JUDGE_SYSTEM_PROMPT
     for immutable_path in (
-        "pico/eval_engine/prompts/",
-        "pico/eval_engine/hooks/",
-        "pico/memory_engine/skills/",
-        "pico/agent/loop/main.py",
-        "pico/context_engine/",
+        "orbit/eval_engine/prompts/",
+        "orbit/eval_engine/hooks/",
+        "orbit/memory_engine/skills/",
+        "orbit/agent/loop/main.py",
+        "orbit/context_engine/",
     ):
         assert immutable_path not in JUDGE_SYSTEM_PROMPT
 

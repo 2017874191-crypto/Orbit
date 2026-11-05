@@ -6,7 +6,7 @@ import { render } from 'ink-testing-library'
 import React from 'react'
 import { describe, expect, it } from 'vitest'
 
-import { picoLogo, picoLogoWord, PICO_WORD_WIDTH } from '../banner.js'
+import { orbitLogo, orbitLogoWord, ORBIT_WORD_WIDTH } from '../banner.js'
 import { Branding, formatProvider, StartupLoader } from '../components/branding.js'
 import { DEFAULT_THEME } from '../theme.js'
 
@@ -20,7 +20,7 @@ describe('Branding', () => {
 describe('StartupLoader', () => {
   it('renders a spinner frame and the first startup message', () => {
     const { lastFrame } = render(<StartupLoader t={DEFAULT_THEME} />)
-    expect(lastFrame()).toContain('starting pico')
+    expect(lastFrame()).toContain('starting orbit')
     expect(lastFrame()).toMatch(/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/)
   })
 })
@@ -29,22 +29,22 @@ describe('StartupLoader', () => {
 describe('banner wordmark', () => {
   const ramp = DEFAULT_THEME.yellow
 
-  it('picoLogo renders the 6-row block wordmark', () => {
-    const lines = picoLogo(ramp)
+  it('orbitLogo renders the 6-row block wordmark', () => {
+    const lines = orbitLogo(ramp)
     expect(lines.length).toBe(6)
     expect(lines.map(([, text]) => text).join('')).toContain('█')
   })
 
-  it('picoLogoWord renders just PICO within one-word width', () => {
-    const lines = picoLogoWord(ramp)
+  it('orbitLogoWord renders just ORBIT within one-word width', () => {
+    const lines = orbitLogoWord(ramp)
     expect(lines.length).toBe(6)
     expect(lines.map(([, text]) => text).join('')).toContain('█')
     const maxWidth = Math.max(...lines.map(([, text]) => [...text].length))
-    expect(maxWidth).toBeLessThanOrEqual(PICO_WORD_WIDTH)
+    expect(maxWidth).toBeLessThanOrEqual(ORBIT_WORD_WIDTH)
   })
 
-  it('PICO word is compact enough for a standard terminal', () => {
-    expect(PICO_WORD_WIDTH).toBeLessThanOrEqual(40)
+  it('ORBIT word is compact enough for a standard terminal', () => {
+    expect(ORBIT_WORD_WIDTH).toBeLessThanOrEqual(40)
   })
 })
 

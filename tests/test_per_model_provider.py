@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from pico.config.schema import ModelEndpoint
-from pico.providers.base import ErrorClassification, LLMProvider, LLMResponse
-from pico.providers.per_model_provider import PerModelProvider
+from orbit.config.schema import ModelEndpoint
+from orbit.providers.base import ErrorClassification, LLMProvider, LLMResponse
+from orbit.providers.per_model_provider import PerModelProvider
 
 
 def _fallback():

@@ -5,8 +5,8 @@ from types import SimpleNamespace
 import pytest
 from mcp import types
 
-from pico.agent.tools.mcp import MCPToolWrapper
-from pico.agent.tools.registry import ToolRegistry
+from orbit.agent.tools.mcp import MCPToolWrapper
+from orbit.agent.tools.registry import ToolRegistry
 
 
 class _Session:

@@ -28,13 +28,13 @@ from typing import Any
 import pytest
 import yaml
 
-from pico.evolver.candidate_manifest import LABEL_POLICIES, CandidateLabel, ManifestGateError
-from pico.evolver.launch.config import load_run_spec
-from pico.evolver.launch.contract import LaunchContext
-from pico.evolver.launch.registry import load_bench
-from pico.evolver.orchestrator.scoring import EvaluationVerdict
-from pico.evolver.orchestrator.state.journal import RoundJournal
-from pico.evolver.tree import git_ops
+from orbit.evolver.candidate_manifest import LABEL_POLICIES, CandidateLabel, ManifestGateError
+from orbit.evolver.launch.config import load_run_spec
+from orbit.evolver.launch.contract import LaunchContext
+from orbit.evolver.launch.registry import load_bench
+from orbit.evolver.orchestrator.scoring import EvaluationVerdict
+from orbit.evolver.orchestrator.state.journal import RoundJournal
+from orbit.evolver.tree import git_ops
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = REPO_ROOT / "benchmarks" / "evolver" / "subject_template"

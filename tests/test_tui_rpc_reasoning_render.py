@@ -15,9 +15,9 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any
 
-from pico.agent.loop import AgentLoop
-from pico.providers.base import StreamDelta
-from pico.providers.litellm_provider import LiteLLMProvider
+from orbit.agent.loop import AgentLoop
+from orbit.providers.base import StreamDelta
+from orbit.providers.litellm_provider import LiteLLMProvider
 
 
 class _FakeProvider:

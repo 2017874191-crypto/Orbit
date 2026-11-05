@@ -1,6 +1,6 @@
-"""Tests for the shared BM25 retrieval kernel (pico.utils.bm25)."""
+"""Tests for the shared BM25 retrieval kernel (orbit.utils.bm25)."""
 
-from pico.utils.bm25 import BM25Okapi, tokenize
+from orbit.utils.bm25 import BM25Okapi, tokenize
 
 
 def test_tokenize_alphanumeric_lowercased() -> None:

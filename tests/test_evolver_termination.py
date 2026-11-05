@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import pytest
 
-from pico.evolver.analysis.stability_bucket import StabilityBucket, TaskStability
-from pico.evolver.orchestrator.config import OrchestratorConfig, Termination
-from pico.evolver.orchestrator.gates.policy import (
+from orbit.evolver.analysis.stability_bucket import StabilityBucket, TaskStability
+from orbit.evolver.orchestrator.config import OrchestratorConfig, Termination
+from orbit.evolver.orchestrator.gates.policy import (
     CandidateOutcome,
     FrozenColdStartBaseline,
 )
-from pico.evolver.orchestrator.loop import EvolutionOrchestrator
-from pico.evolver.orchestrator.scoring import (
+from orbit.evolver.orchestrator.loop import EvolutionOrchestrator
+from orbit.evolver.orchestrator.scoring import (
     EvalBackend,
     EvaluationVerdict,
     TaskEval,
 )
-from pico.evolver.scheduler.anchor_selection import simple_anchor
-from pico.evolver.tree.node import HarnessNode, NodeStatus
+from orbit.evolver.scheduler.anchor_selection import simple_anchor
+from orbit.evolver.tree.node import HarnessNode, NodeStatus
 
 
 class _NoDecisionGate:

@@ -3,7 +3,7 @@ from typing import get_args
 
 import pytest
 
-from pico.spine import (
+from orbit.spine import (
     ChatType,
     Deliverable,
     Media,

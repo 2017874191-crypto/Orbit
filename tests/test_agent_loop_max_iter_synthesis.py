@@ -17,13 +17,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from pico.agent.loop import AgentLoop
-from pico.agent.loop.main import _MAX_ITER_STATIC_FALLBACK, _MAX_ITER_SYNTHESIS_PROMPT
-from pico.call_efficiency import CallEfficiency
-from pico.config.pico import CheckpointConfig, RuntimeConfig
-from pico.providers.base import LLMProvider, LLMResponse, ToolCallRequest
-from pico.spine.message import ChatType, Source
-from pico.spine.turn import Origin, TurnRequest
+from orbit.agent.loop import AgentLoop
+from orbit.agent.loop.main import _MAX_ITER_STATIC_FALLBACK, _MAX_ITER_SYNTHESIS_PROMPT
+from orbit.call_efficiency import CallEfficiency
+from orbit.config.orbit import CheckpointConfig, RuntimeConfig
+from orbit.providers.base import LLMProvider, LLMResponse, ToolCallRequest
+from orbit.spine.message import ChatType, Source
+from orbit.spine.turn import Origin, TurnRequest
 
 
 @pytest.fixture

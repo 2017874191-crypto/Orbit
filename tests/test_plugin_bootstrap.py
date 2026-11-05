@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from pico.plugin import (
+from orbit.plugin import (
     PluginConflictError,
     PluginNotFoundError,
     PluginRegistry,
@@ -30,7 +30,7 @@ def _write_manifest(
     sub = root / plugin_id
     sub.mkdir(parents=True, exist_ok=True)
     flags = f"bundled = {str(bundled).lower()}\nenabled_by_default = {str(enabled).lower()}\n"
-    (sub / "pico-plugin.toml").write_text(
+    (sub / "orbit-plugin.toml").write_text(
         textwrap.dedent(f"""
         [plugin]
         id = "{plugin_id}"
@@ -110,7 +110,7 @@ def _write_real_plugin(
         name = "{tool_name}"
         factory = "{pkg}.factories:make_tool"
         """)
-    (sub / "pico-plugin.toml").write_text(
+    (sub / "orbit-plugin.toml").write_text(
         textwrap.dedent(f"""
         [plugin]
         id = "{plugin_id}"
@@ -169,8 +169,8 @@ class TestEndToEnd:
         self,
         tmp_path: Path,
     ) -> None:
-        from pico.cli._plugin_stack import maybe_build_memory_backend
-        from pico.config.pico import PicoConfig
+        from orbit.cli._plugin_stack import maybe_build_memory_backend
+        from orbit.config.orbit import OrbitConfig
 
         with pytest.raises(
             PluginNotFoundError,
@@ -178,7 +178,7 @@ class TestEndToEnd:
         ):
             maybe_build_memory_backend(
                 tmp_path,
-                PicoConfig(),
+                OrbitConfig(),
                 registry=PluginRegistry(),
             )
 
@@ -186,14 +186,14 @@ class TestEndToEnd:
         self,
         tmp_path: Path,
     ) -> None:
-        from pico.cli._plugin_stack import maybe_build_memory_backend
-        from pico.config.pico import MemoryConfig, PicoConfig
+        from orbit.cli._plugin_stack import maybe_build_memory_backend
+        from orbit.config.orbit import MemoryConfig, OrbitConfig
 
         class _RegistryMustStayUnused:
             def __getattribute__(self, name: str):
                 raise AssertionError(f"Memory-off touched plugin registry: {name}")
 
-        config = PicoConfig(memory=MemoryConfig(backend=None))
+        config = OrbitConfig(memory=MemoryConfig(backend=None))
         assert (
             maybe_build_memory_backend(
                 tmp_path,

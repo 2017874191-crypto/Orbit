@@ -12,7 +12,7 @@ ALLOWED_ROOT_DIRECTORIES = {
     "LICENSES",
     "benchmarks",
     "docs",
-    "pico",
+    "orbit",
     "scripts",
     "tests",
     "ui-tui",
@@ -83,7 +83,7 @@ FORBIDDEN_TEST_MARKERS = {
 }
 FORBIDDEN_TEXT = {
     "github.com/" + "Hackerismydream/" + "myna": "private repository reference",
-    "github.com/" + "Hackerismydream/" + "pico": "development repository reference",
+    "github.com/" + "Hackerismydream/" + "orbit": "development repository reference",
     "raw.githubusercontent.com/" + "Hackerismydream": "development installer reference",
     "MYNA_" + "WHEEL_URL": "unpublished Memory wheel reference",
 }

@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from pico.agent.loop import AgentLoop
-from pico.config import ContextConfig
-from pico.context_engine import ContextAssembler, TurnContext
-from pico.context_engine.curator import CuratorArchiveStore
-from pico.context_engine.segments.curator import CuratorSegmentBuilder
-from pico.memory_engine.base import TokenBudget
-from pico.providers.base import ErrorClassification, LLMProvider, LLMResponse, ToolCallRequest
-from pico.spine.message import ChatType, Media, Source
-from pico.spine.turn import Origin, TurnRequest
+from orbit.agent.loop import AgentLoop
+from orbit.config import ContextConfig
+from orbit.context_engine import ContextAssembler, TurnContext
+from orbit.context_engine.curator import CuratorArchiveStore
+from orbit.context_engine.segments.curator import CuratorSegmentBuilder
+from orbit.memory_engine.base import TokenBudget
+from orbit.providers.base import ErrorClassification, LLMProvider, LLMResponse, ToolCallRequest
+from orbit.spine.message import ChatType, Media, Source
+from orbit.spine.turn import Origin, TurnRequest
 
 
 class CuratorScriptProvider(LLMProvider):

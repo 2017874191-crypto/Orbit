@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from pico.memory_engine.consolidate.consolidator import MemoryConsolidator
-from pico.session.manager import Session
-from pico.utils import helpers
+from orbit.memory_engine.consolidate.consolidator import MemoryConsolidator
+from orbit.session.manager import Session
+from orbit.utils import helpers
 
 
 class _FakeEncoding:

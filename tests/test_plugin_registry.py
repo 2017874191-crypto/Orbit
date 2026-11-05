@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from pico.plugin import (
+from orbit.plugin import (
     Contributes,
     DiscoveredPlugin,
     MemoryBackendContribution,

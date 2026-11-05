@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import pytest
 
-from pico.providers.base import LLMProvider
-from pico.providers.common_models import common_models_for
-from pico.providers.registry import PROVIDERS, find_by_name
+from orbit.providers.base import LLMProvider
+from orbit.providers.common_models import common_models_for
+from orbit.providers.registry import PROVIDERS, find_by_name
 
 EXPECTED_PROVIDER_NAMES = {
     "custom",
@@ -68,14 +68,14 @@ def test_seeded_provider_default_model_in_shortlist(slug: str) -> None:
 
 
 def _concrete_provider_subclasses() -> set[type]:
-    """All non-abstract LLMProvider subclasses defined in pico.providers."""
+    """All non-abstract LLMProvider subclasses defined in orbit.providers."""
 
-    import pico.providers.azure_openai_provider  # noqa: F401
-    import pico.providers.custom_provider  # noqa: F401
-    import pico.providers.lazy  # noqa: F401
-    import pico.providers.litellm_provider  # noqa: F401
-    import pico.providers.openai_codex_provider  # noqa: F401
-    import pico.providers.per_model_provider  # noqa: F401
+    import orbit.providers.azure_openai_provider  # noqa: F401
+    import orbit.providers.custom_provider  # noqa: F401
+    import orbit.providers.lazy  # noqa: F401
+    import orbit.providers.litellm_provider  # noqa: F401
+    import orbit.providers.openai_codex_provider  # noqa: F401
+    import orbit.providers.per_model_provider  # noqa: F401
 
     seen: set[type] = set()
     stack = list(LLMProvider.__subclasses__())
@@ -84,19 +84,19 @@ def _concrete_provider_subclasses() -> set[type]:
         stack.extend(cls.__subclasses__())
         if getattr(cls, "__abstractmethods__", frozenset()):
             continue
-        if cls.__module__.startswith("pico.providers"):
+        if cls.__module__.startswith("orbit.providers"):
             seen.add(cls)
     return seen
 
 
 def test_exactly_six_concrete_backend_classes() -> None:
 
-    from pico.providers.azure_openai_provider import AzureOpenAIProvider
-    from pico.providers.custom_provider import CustomProvider
-    from pico.providers.lazy import LazyProvider
-    from pico.providers.litellm_provider import LiteLLMProvider
-    from pico.providers.openai_codex_provider import OpenAICodexProvider
-    from pico.providers.per_model_provider import PerModelProvider
+    from orbit.providers.azure_openai_provider import AzureOpenAIProvider
+    from orbit.providers.custom_provider import CustomProvider
+    from orbit.providers.lazy import LazyProvider
+    from orbit.providers.litellm_provider import LiteLLMProvider
+    from orbit.providers.openai_codex_provider import OpenAICodexProvider
+    from orbit.providers.per_model_provider import PerModelProvider
 
     expected = {
         LiteLLMProvider,

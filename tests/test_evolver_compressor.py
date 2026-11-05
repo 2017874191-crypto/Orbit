@@ -1,4 +1,4 @@
-from pico.evolver.compressor import Event, TrajectoryCompressor
+from orbit.evolver.compressor import Event, TrajectoryCompressor
 
 
 def _tool_call(name: str, arguments: str) -> dict[str, object]:

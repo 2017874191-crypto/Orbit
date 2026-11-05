@@ -135,14 +135,14 @@ message. Saving channel configuration does not prove that live delivery works.
 
 | Scope | Default location |
 | --- | --- |
-| Global configuration and Runtime data | `~/.pico` |
+| Global configuration and Runtime data | `~/.orbit` |
 | Foreground project | current directory |
-| Foreground project state | `~/.pico/projects/<project-id>` |
-| Gateway Workspace | explicit `--workspace`, otherwise `~/.pico/workspace` |
+| Foreground project state | `~/.orbit/projects/<project-id>` |
+| Gateway Workspace | explicit `--workspace`, otherwise `~/.orbit/workspace` |
 
 Normal startup keeps Orbit state outside the repository. Executable Plugins are
-loaded only from Orbit's bundled set, operator-managed `~/.pico/plugins/`, and
-installed `pico.plugins` entry points. A checkout's `.pico/plugins/` directory
+loaded only from Orbit's bundled set, operator-managed `~/.orbit/plugins/`, and
+installed `orbit.plugins` entry points. A checkout's `.orbit/plugins/` directory
 is not an automatic startup source.
 
 Read the [Memory boundary](docs/onboarding/memory.zh-CN.md) and
@@ -177,8 +177,8 @@ uv sync --frozen --extra dev --dev
 npm ci
 npm ci --prefix ui-tui
 make check
-make picobench-smoke
-PICO_RELEASE_OUTPUT=/absolute/empty/output make release-dist
+make orbitbench-smoke
+ORBIT_RELEASE_OUTPUT=/absolute/empty/output make release-dist
 ```
 
 Orbit is pre-1.0. Interfaces can change. `make check` verifies the retained

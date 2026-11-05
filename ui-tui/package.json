@@ -1,8 +1,8 @@
 {
-  "name": "pico-tui",
+  "name": "orbit-tui",
   "version": "0.1.0",
   "private": true,
-  "description": "Pico conversational terminal interface over the TUI-RPC contract.",
+  "description": "Orbit conversational terminal interface over the TUI-RPC contract.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

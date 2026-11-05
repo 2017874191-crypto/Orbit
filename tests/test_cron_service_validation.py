@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from pico.proactive_engine.schedulers.cron.service import CronService
-from pico.proactive_engine.schedulers.cron.types import CronSchedule
+from orbit.proactive_engine.schedulers.cron.service import CronService
+from orbit.proactive_engine.schedulers.cron.types import CronSchedule
 
 
 @pytest.fixture

@@ -15,14 +15,14 @@ from pathlib import Path
 import httpx
 import pytest
 
-from pico.agent.loop import AgentLoop
-from pico.call_efficiency import CallEfficiency, CallEfficiencyProvider
-from pico.providers.base import LLMProvider, LLMResponse, StreamDelta
-from pico.spine.message import ChatType, Source
-from pico.spine.turn import Origin, TurnRequest
-from pico.token_wise import pricing
-from pico.token_wise.base import TokenStrategy
-from pico.token_wise.registry import StrategyRegistry
+from orbit.agent.loop import AgentLoop
+from orbit.call_efficiency import CallEfficiency, CallEfficiencyProvider
+from orbit.providers.base import LLMProvider, LLMResponse, StreamDelta
+from orbit.spine.message import ChatType, Source
+from orbit.spine.turn import Origin, TurnRequest
+from orbit.token_wise import pricing
+from orbit.token_wise.base import TokenStrategy
+from orbit.token_wise.registry import StrategyRegistry
 
 _REAL_FETCH = pricing._fetch_openrouter_models
 

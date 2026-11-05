@@ -1,6 +1,6 @@
 """Regression: RpcServer must speak proper JSON-RPC over a unix domain socket.
 
-P0 dogfood blocker (2026-05-15) - typing ``/cha`` in ``pico`` produced
+P0 dogfood blocker (2026-05-15) - typing ``/cha`` in ``orbit`` produced
 repeating ``pipe closed by peer or os.write(pipe, data) raised exception.``
 warnings (asyncio.unix_events) that bled into the Ink render. Root cause:
 ``connect_write_pipe`` builds a ``_UnixWritePipeTransport`` that registers a
@@ -41,9 +41,9 @@ from pathlib import Path
 
 import pytest
 
-from pico.tui_rpc.dispatcher import Dispatcher
-from pico.tui_rpc.methods import register_aligned_methods
-from pico.tui_rpc.server import RpcServer
+from orbit.tui_rpc.dispatcher import Dispatcher
+from orbit.tui_rpc.methods import register_aligned_methods
+from orbit.tui_rpc.server import RpcServer
 
 # ---------------------------------------------------------------------------
 

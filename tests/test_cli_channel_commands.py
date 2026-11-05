@@ -1,4 +1,4 @@
-"""CLI contract tests for Pico's retained Channels."""
+"""CLI contract tests for Orbit's retained Channels."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from pico.cli.commands import app
-from pico.config.loader import set_config_path
+from orbit.cli.commands import app
+from orbit.config.loader import set_config_path
 
 runner = CliRunner()
 
@@ -171,7 +171,7 @@ def test_reset_confirmation_abort_and_accept(tmp_config: Path) -> None:
 
 
 def test_all_retained_channels_default_allow_from_to_wildcard() -> None:
-    from pico.config.schema import ChannelsConfig
+    from orbit.config.schema import ChannelsConfig
 
     config = ChannelsConfig()
     assert config.feishu.allow_from == ["*"]

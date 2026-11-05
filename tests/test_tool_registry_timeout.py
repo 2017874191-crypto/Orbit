@@ -15,8 +15,8 @@ import asyncio
 
 import pytest
 
-from pico.agent.tools.base import Tool, ToolResult
-from pico.agent.tools.registry import ToolRegistry
+from orbit.agent.tools.base import Tool, ToolResult
+from orbit.agent.tools.registry import ToolRegistry
 
 
 class _SleepTool(Tool):
@@ -122,8 +122,8 @@ async def test_cancelled_error_propagates_not_swallowed():
 @pytest.mark.asyncio
 async def test_long_running_tools_keep_generous_ceilings():
 
-    from pico.agent.tools.shell import ExecTool
-    from pico.agent.tools.spawn import SpawnTool
+    from orbit.agent.tools.shell import ExecTool
+    from orbit.agent.tools.spawn import SpawnTool
 
     assert ExecTool.timeout_seconds >= 600
     assert SpawnTool.timeout_seconds >= 600
