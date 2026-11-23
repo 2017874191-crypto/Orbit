@@ -13,6 +13,8 @@ from benchmarks.orbitbench.scorecard_campaign import (
     run_scorecard_campaign,
 )
 
+CURRENT_SCORECARD_SUITE_PATH = DEFAULT_SCORECARD_SUITE_PATH.parent / "agent_application_scorecard_v2.yaml"
+
 
 def test_scorecard_suite_excludes_completed_and_historical_packs() -> None:
     suite = load_campaign_suite(DEFAULT_SCORECARD_SUITE_PATH)
@@ -58,6 +60,25 @@ def test_scorecard_suite_freezes_expected_denominators_and_budget() -> None:
     assert estimate.estimated_cny <= suite.budget.hard_cap_cny
     assert suite.execution.provider_call_max_attempts == 4
     assert suite.budget.max_additional_provider_attempts == 96
+
+
+def test_current_scorecard_draft_preserves_tasks_and_claims_with_peak_budget() -> None:
+    historical = load_campaign_suite(DEFAULT_SCORECARD_SUITE_PATH)
+    current = load_campaign_suite(CURRENT_SCORECARD_SUITE_PATH)
+    estimate = estimate_worst_case_cost(
+        current,
+        modes=(CampaignMode.CALIBRATION, CampaignMode.FORMAL),
+    )
+
+    assert current.provider.model == "deepseek-flash"
+    assert current.calibration.expected_trials == historical.calibration.expected_trials
+    assert current.formal.expected_trials == historical.formal.expected_trials
+    assert current.calibration.pack_ids == historical.calibration.pack_ids
+    assert current.formal.pack_ids == historical.formal.pack_ids
+    assert current.claim_rules == historical.claim_rules
+    assert current.budget.input_cache_miss_usd_per_million == 0.30
+    assert current.budget.output_usd_per_million == 1.20
+    assert estimate.estimated_cny <= current.budget.hard_cap_cny
 
 
 def test_makefile_exposes_scorecard_estimate_and_ship() -> None:

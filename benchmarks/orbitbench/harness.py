@@ -5,6 +5,7 @@ import contextlib
 from typing import Any
 
 from .artifacts import ArtifactStore, artifact_dict
+from .call_evidence import EvidenceIntegrityError
 from .plan import ExperimentPlan, compile_plan, variant_diff
 from .protocol import (
     Pack,
@@ -308,6 +309,8 @@ async def _execute_trial(pack: Pack, context: TrialContext) -> TrialExecution:
                 pack.run_trial(context),
                 timeout=context.experiment.execution.timeout_seconds,
             )
+    except EvidenceIntegrityError:
+        raise
     except TimeoutError:
         return TrialExecution(
             status=TrialStatus.TASK_TIMEOUT,

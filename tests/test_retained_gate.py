@@ -29,7 +29,10 @@ def test_make_test_retained_excludes_every_opt_in_marker() -> None:
     assert result.returncode == 0, result.stderr
     assert "pytest" in result.stdout
     assert "--frozen" in result.stdout
-    assert "--all-extras" in result.stdout
+    if os.name == "nt":
+        assert "--extra dev --extra tools --extra channels" in result.stdout
+    else:
+        assert "--all-extras" in result.stdout
     assert "--exact" in result.stdout
     assert "--strict-markers" in result.stdout
     assert OPT_IN_EXPRESSION in result.stdout

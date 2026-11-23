@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from benchmarks.orbitbench.call_evidence import CallEvidence, EvidenceProvider, verify_bundle
 from benchmarks.orbitbench.canonical import canonical_digest, canonical_json
 from benchmarks.orbitbench.packs.runtime.live_scheduler_experiment import (
     LiveSchedulerConfig,
@@ -81,14 +82,16 @@ async def test_live_arm_runs_real_agent_loop_with_marker_verification(tmp_path) 
     base = Config()
     base.agents.defaults.model = "fake/live-agent"
     work = _live_work(config, 0)
+    collector = CallEvidence(tmp_path / "evidence")
 
     result = await _run_live_arm(
         config,
         work=work,
         scheduler_kind="session_lanes",
         base_config=base,
-        provider=_MarkerProvider(),
-        workspace=tmp_path,
+        provider=EvidenceProvider(_MarkerProvider(), collector),
+        workspace=tmp_path / "workspace",
+        call_evidence=collector,
     )
 
     assert result["accepted_requests"] == 4
@@ -104,6 +107,9 @@ async def test_live_arm_runs_real_agent_loop_with_marker_verification(tmp_path) 
     assert all(record["execution_ms"] is not None for record in measured)
     assert all(record["end_to_end_ms"] is not None for record in measured)
     assert all(record["verifier_failures"] == [] for record in result["turn_records"])
+    collector.finish()
+    assert verify_bundle(collector.root) == {"passed": True, "attempt_count": 4}
+    assert len(list(collector.root.glob("trials/*.json"))) == 4
 
     pairs = [
         {

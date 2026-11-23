@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from benchmarks.orbitbench.call_evidence import evidence_logical_call
 from benchmarks.orbitbench.host import RecordingOutlet, RuntimeTrialHost
 from benchmarks.orbitbench.isolation import TrialIsolation
 from benchmarks.orbitbench.protocol import TrialContext, TrialExecution
@@ -12,6 +13,12 @@ from benchmarks.orbitbench.records import (
     TrialStatus,
     TurnTerminalState,
     VerificationState,
+)
+from benchmarks.orbitbench.trial_evidence import (
+    capture_observation,
+    capture_workspace_file,
+    observed_provider,
+    recorded_trial,
 )
 from benchmarks.orbitbench.usage import (
     ModelCallUsage,
@@ -64,6 +71,10 @@ class _CapturingProvider(RecordingProvider):
         super().__init__(delegate, recorder=recorder)
         self.message_windows: list[list[dict[str, Any]]] = []
 
+    async def chat_with_retry(self, **kwargs) -> LLMResponse:
+        with evidence_logical_call():
+            return await super().chat_with_retry(**kwargs)
+
     async def chat(
         self,
         messages: list[dict[str, Any]],
@@ -88,6 +99,10 @@ class _CapturingProvider(RecordingProvider):
 
 class _RoleScopedProvider(LLMProvider):
     _CHAT_RETRY_DELAYS = (0,)
+
+    async def chat_with_retry(self, **kwargs) -> LLMResponse:
+        with evidence_logical_call():
+            return await super().chat_with_retry(**kwargs)
 
     def __init__(self, delegate: LLMProvider, role: str) -> None:
         super().__init__(
@@ -164,6 +179,7 @@ class RuntimeContextTrialRunner:
         self._orbit_config = orbit_config
         self._provider = provider
 
+    @recorded_trial
     async def __call__(
         self,
         *,
@@ -184,7 +200,7 @@ class RuntimeContextTrialRunner:
             model=self._provider.get_default_model(),
         )
         recorder = UsageRecorder()
-        provider = _CapturingProvider(self._provider, recorder=recorder)
+        provider = _CapturingProvider(observed_provider(self._provider), recorder=recorder)
         provider.generation = GenerationSettings(
             temperature=config.agents.defaults.temperature,
             max_tokens=config.agents.defaults.max_tokens,
@@ -230,7 +246,9 @@ class RuntimeContextTrialRunner:
             finally:
                 await host.close()
         latency_ms = (time.perf_counter() - started) * 1_000
+        capture_observation(observation)
         verification = await verifier.verify(isolation.workspace)
+        capture_workspace_file(isolation.workspace, task.artifact_path, name="final-artifact")
         artifact_diagnostics = verifier.diagnostic_metrics(
             isolation.workspace,
         )

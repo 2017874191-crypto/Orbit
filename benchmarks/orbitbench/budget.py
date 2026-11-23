@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import contextvars
-import fcntl
 import json
 import math
 import os
@@ -22,6 +21,8 @@ from orbit.providers.base import (
     LLMResponse,
     StreamDelta,
 )
+from orbit.providers.observation import provider_event
+from orbit.utils.portable_lock import file_lock
 
 from .canonical import canonical_digest, to_primitive
 
@@ -378,15 +379,12 @@ class ProviderBudgetLedger:
 
     @contextlib.contextmanager
     def _locked(self):
-        with self.path.open("a+", encoding="utf-8") as handle:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-            try:
+        with file_lock(Path(str(self.path) + ".lock")):
+            with self.path.open("a+", encoding="utf-8") as handle:
                 events = _read_events(handle)
                 self._validate_prefix(events)
                 self._validate_or_bootstrap_high_water(events)
                 yield handle
-            finally:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     def _append_event(
         self,
@@ -503,14 +501,12 @@ class ProviderBudgetLedger:
             os.fsync(handle.fileno())
         try:
             os.replace(temp_path, self.high_water_path)
-            directory_fd = os.open(
-                self.high_water_path.parent,
-                os.O_RDONLY,
-            )
-            try:
-                os.fsync(directory_fd)
-            finally:
-                os.close(directory_fd)
+            if os.name != "nt":
+                directory_fd = os.open(self.high_water_path.parent, os.O_RDONLY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
         finally:
             temp_path.unlink(missing_ok=True)
 
@@ -582,6 +578,7 @@ class BudgetGuardedProvider(LLMProvider):
             tool_choice=tool_choice,
         )
         try:
+            provider_event("budget_reservation", {"budget_request_id": request_id})
             response = await self._delegate.chat(
                 messages=messages,
                 tools=tools,

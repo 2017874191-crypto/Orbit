@@ -141,6 +141,38 @@ def test_scorecard_requires_formal_manifest_from_current_commit(tmp_path) -> Non
     with pytest.raises(ValueError, match="current Scorecard subject"):
         _formal_inputs(summary_path, orbit_commit="b" * 40)
 
+    v2_spec = {
+        **spec,
+        "identity": {**spec["identity"], "campaign_suite": "agent-application-scorecard-v2"},
+    }
+    v2_experiment_id = canonical_digest({"spec": v2_spec, "pack_definitions": []})
+    v2_manifest = {
+        **manifest,
+        "spec": v2_spec,
+        "experiment_id": v2_experiment_id,
+        "plan_digest": v2_experiment_id,
+    }
+    v2_root = tmp_path / "v2"
+    v2_root.mkdir()
+    (v2_root / "manifest.json").write_text(json.dumps(v2_manifest), encoding="utf-8")
+    v2_payload = {**_formal_summary(), "experiment_id": v2_experiment_id}
+    v2_summary_path = v2_root / "summary.json"
+    v2_summary_path.write_text(
+        json.dumps({**v2_payload, "report_digest": canonical_digest(v2_payload)}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="current Scorecard subject"):
+        _formal_inputs(v2_summary_path, orbit_commit=orbit_commit)
+    assert (
+        _formal_inputs(
+            v2_summary_path,
+            orbit_commit=orbit_commit,
+            campaign_suite="agent-application-scorecard-v2",
+        )["experiment_id"]
+        == v2_experiment_id
+    )
+
 
 def test_scorecard_counts_negative_runtime_as_current_evidence() -> None:
     result = compute_scorecard(

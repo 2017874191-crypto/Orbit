@@ -30,6 +30,149 @@ identity. Fallback models are forbidden.
 
 ## Current Scorecard campaign
 
+### Local evidence recording
+
+Runtime Context Trials and deterministic/real-provider Tool/MCP Trials retain
+per-Trial bundles under `<output-root>/.orbitbench-call-evidence/<trial-digest>/`.
+The digest binds the experiment, plan, Trial key and block attempt; two arms
+and block retries do not overwrite each other. Trial execution artifacts link
+the bundle and its integrity digest. Calls include auxiliary Context calls,
+model retries and budget reservation IDs when available. The MCP stdio server
+does not call the model: its receipt file is copied after shutdown.
+
+Each bundle contains requested parameters, normalized responses and terminal
+records, observed final reply/events, final Context artifact or MCP receipt
+bytes, and verification findings. Artifact bytes are base64 encoded inside a
+JSON record with a SHA-256 checksum; invalid JSON outputs remain inspectable.
+Missing or out-of-workspace artifacts are explicitly marked. No expected
+answers are copied into the Agent workspace by the recorder.
+
+Verify the bundle and export failed calls without contacting a Provider:
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.call_evidence /absolute/path/to/bundle
+```
+
+Recording is non-streaming and in-process. It provides diagnostic evidence,
+not OS-level protection against an Agent with arbitrary same-user execution.
+MCP receipts here prove fixture calls, not changes in a real business database.
+Offline false-success regressions test the rule verifier; they do not establish
+LLM Judge robustness or runtime authorization enforcement. Evidence is private
+by default in usage: it contains task text and outputs and must be reviewed
+before publication. The collector does not configure filesystem ACLs.
+Evidence persistence/integrity failures abort the harness instead of entering
+comparison-block retries. This prevents further model dispatch under that
+evaluation after its evidence channel fails. Ordinary task failures retain
+their existing scoring and retry rules.
+
+### Offline review report and human audit queue
+
+The offline report requires an explicit planned-Trial list, rather than using
+only the files that happen to exist. Freeze the list before a real evaluation;
+an omitted task cannot be discovered from its absent evidence. The input is a
+review plan, not proof of preregistration or source authenticity:
+
+```json
+{
+  "schema": "orbit.offline-review-plan.v1",
+  "data_kind": "recorded",
+  "audit_rate": 0.2,
+  "audit_seed": 42,
+  "budget_ledger": "provider-budget.jsonl",
+  "trials": [
+    {
+      "trial_id": "context-task-1-control-r0",
+      "task_id": "task-1",
+      "arm": "context-fifo",
+      "message_id": "identity-from-trial-record",
+      "attempt_bundles": [".orbitbench-call-evidence/trial-digest"]
+    }
+  ]
+}
+```
+
+Paths are relative to the plan. Each entry is one planned task/arm/repetition.
+List all block attempts in their predeclared order. A block with its own message
+identity can use `{"path": "bundle-path", "message_id": "that-block-id"}`.
+An empty list or nonexistent path stays in the denominator as missing evidence.
+The first attempt determines success; later attempts cannot replace a failure.
+All declared attempts contribute to cost. This descriptive policy is separate
+from the historical campaign's block-selection policy. Do not combine packs,
+subjects or distributions into a headline score; use separate review plans.
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.evidence_report \
+  --plan /absolute/path/to/review-plan.json --output-root /absolute/new/report-dir
+```
+
+Outputs are `report.json`, `REPORT.md`, and `audit-queue.json`. The report checks
+bundle hashes, preserves unknown usage/cost/duration as missing, distinguishes
+reported truncation from reaching the token ceiling, and separates all anomaly
+reviews from seeded random-normal reviews. The target normal sample fraction
+is 10–20% per arm, rounded up; actual inclusion probabilities are retained.
+Reviewers fill in reviewer/verdict/notes separately. Queue creation does not
+mean human review has happened, and the report never certifies quality parity.
+
+Costs come from the supplied ledger's rate estimates and conservative failed
+reservations, not invoices. An open or unmatched reservation leaves arm cost
+unknown. Unassigned ledger entries such as preflight requests are listed
+separately and included only in the entire-ledger summary. Duration quantiles
+cover available first-attempt end-to-end measurements, with coverage counts;
+they are not a causal latency comparison or timeout-adjusted estimate.
+
+Create a fully synthetic example without calling a model (both paths must be new):
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.evidence_report \
+  --demo /absolute/new/demo-evidence --output-root /absolute/new/demo-report
+```
+
+For an actual local Runtime-to-report acceptance run, use a new directory:
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.offline_acceptance \
+  --output-root /absolute/new/offline-acceptance
+```
+
+This freezes review plans before dispatch and executes eight Trials through
+Context read/write Tools and real local stdio MCP: one positive and one
+deliberately invalid response per arm. The Context scripted Provider explicitly
+reads public expected answers; it is oracle-assisted infrastructure validation,
+not evidence of model reasoning or generalization. The MCP negative Provider
+only claims success and produces no receipt. Acceptance requires all four
+positive Trials to pass, all four negative Trials to fail, and report statuses
+to match the executed Trials with no unverified bundles.
+
+The command writes `acceptance-result.json` and separate Context and Tool/MCP
+reports/audit queues. Reports label `execution_mode` as
+`scripted_runtime_oracle_assisted`. They never certify capability or mark human
+review complete. Costs remain unknown in the report because no paid Provider
+ledger exists; this run issues no external model requests. These cases are
+public development fixtures, not private holdouts.
+
+Machine assistance for the acceptance audit is available without rerunning it:
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.review_acceptance \
+  /absolute/path/to/offline-acceptance --output /absolute/new/machine-review.json
+```
+
+It checks the frozen review-plan/report digests and bundle integrity, decodes
+artifact bytes, and rechecks them against the current public fixture. Its
+findings are automated rule rechecks, not human judgments. Human reviewers
+still fill the original audit queues, and `human_review_completed` remains false.
+
+The lightweight generalization proposal is
+`suites/generalization_pilot_v1.protocol.json`. It proposes 24 task cases / 48
+Trials across Context and MCP, split into three stress strata with matched
+counterfactuals. These are exploratory sample sizes, not proof of quality
+noninferiority. This is a proposal, not an executable campaign suite: no private
+task loader or holdout access control is implemented by the JSON file. Existing
+public tasks and developer-visible mutations stay in the development split;
+fresh private task families must be authored and retained by an independent
+custodian with separate storage/permissions. Do not generate a supposed secret
+holdout inside this development workspace or reuse an exposed final batch.
+
 The current Scorecard campaign runs the Context and Tool/MCP Packs. CallEfficiency
 and Runtime remain independent evidence tracks and are composed only after their
 own Claim Gates are evaluated. No external Memory backend experiment is included
@@ -70,6 +213,28 @@ Print the frozen worst-case budget with:
 ```bash
 make orbitbench-scorecard-estimate
 ```
+
+The historical v1 suite remains the default. A separate v2 draft uses the
+currently documented `deepseek-flash` name and peak prices. Review its offline
+maximum before considering any paid run:
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.scorecard_campaign estimate \
+  --suite benchmarks/orbitbench/suites/agent_application_scorecard_v2.yaml
+```
+
+At the 2026-11-10 pricing snapshot, the unchanged 128-Trial design projects
+127.7748 CNY at the suite's 7.5 USD-to-CNY multiplier. The draft's 150 CNY
+hard cap is a proposed ceiling, not spending approval. The estimate assumes
+all input tokens are cache misses and uses peak prices. Recheck the provider's
+model and price before execution. A v2 paid run requires explicit `--suite`
+and a separate `--output-root`; the configured Orbit model must also resolve
+to `deepseek/deepseek-flash`. Do not combine v1 and v2 evidence.
+The standalone scorer can read a v2 formal summary when passed
+`--campaign-suite agent-application-scorecard-v2`; it still applies the frozen
+v1 scoring formula and requires the usual current-commit evidence. The full
+`orbitbench-reproduce` workflow remains pinned to v1, including its Runtime
+and TokenWise stages, and must not be used to launch the v2 draft.
 
 Run the paid campaign with:
 

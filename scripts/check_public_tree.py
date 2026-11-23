@@ -54,6 +54,8 @@ FORBIDDEN_PATHS = {
 }
 ALLOWED_EVALUATION_DOCS = {
     "docs/evaluation/README.md",
+    "docs/evaluation/evaluation-baseline.md",
+    "docs/evaluation/orbit-migration.md",
     "docs/evaluation/runtime-scheduler-experiments.md",
     "docs/evaluation/tokenwise-cost.md",
     "docs/evaluation/tracing-overhead.md",
@@ -123,11 +125,7 @@ def _tracked_paths(root: Path) -> list[str]:
 
 
 def _documentation_allowed(path: str) -> bool:
-    return (
-        path.startswith("docs/onboarding/")
-        or path.startswith("docs/examples/")
-        or path in ALLOWED_EVALUATION_DOCS
-    )
+    return path.startswith("docs/onboarding/") or path.startswith("docs/examples/") or path in ALLOWED_EVALUATION_DOCS
 
 
 def check_public_tree(root: Path, tracked_paths: Iterable[str] | None = None) -> list[str]:

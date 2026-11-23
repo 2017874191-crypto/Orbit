@@ -19,6 +19,7 @@ from loguru import logger
 
 from orbit.providers.base import LLMProvider, LLMResponse, StreamDelta, ToolCallRequest
 from orbit.providers.litellm_setup import import_litellm
+from orbit.providers.observation import provider_event
 from orbit.providers.registry import find_by_model, find_gateway
 
 litellm = import_litellm()
@@ -464,7 +465,29 @@ class LiteLLMProvider(LLMProvider):
             kwargs["num_retries"] = self.transport_num_retries
 
         try:
+            provider_event(
+                "adapter_request",
+                {
+                    key: kwargs[key]
+                    for key in (
+                        "model",
+                        "messages",
+                        "tools",
+                        "max_tokens",
+                        "temperature",
+                        "reasoning_effort",
+                        "tool_choice",
+                        "timeout",
+                        "num_retries",
+                        "drop_params",
+                    )
+                    if key in kwargs
+                },
+            )
             response = await acompletion(**kwargs)
+            provider_event(
+                "sdk_response", {key: getattr(response, key, None) for key in ("id", "model", "choices", "usage")}
+            )
             return self._parse_response(response)
         except Exception as e:
             # 把错误作为 content 返回以便平稳处理，但要在实时异常

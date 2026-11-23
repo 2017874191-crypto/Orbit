@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
 
 from benchmarks.orbitbench.budget import (
     ProviderBudgetError,
     ProviderRequestNotDispatchedError,
 )
+from benchmarks.orbitbench.call_evidence import verify_bundle
 from benchmarks.orbitbench.packs.context import (
     ContextPack,
     ContextTrack,
@@ -307,6 +309,12 @@ async def test_runtime_context_runner_excludes_plugin_tools_and_uses_sealed_veri
     assert set(provider.max_tokens_seen) == {500}
     assert all(names == {"read_file", "write_file"} for names in provider.tool_names_seen)
     assert plugin_tool_builds == 0
+    evidence_root = tmp_path / execution.artifact_refs[-1]
+    assert verify_bundle(evidence_root)["passed"]
+    assert len(list(evidence_root.glob("calls/*/request.json"))) == 3
+    assert json.loads((evidence_root / "artifacts/final-artifact.json").read_text("utf-8"))["status"] == "captured"
+    requests = [json.loads(p.read_text("utf-8")) for p in evidence_root.glob("calls/*/request.json")]
+    assert all(request["identity"]["arm"] == variant.variant_id for request in requests)
 
 
 async def test_runtime_context_runner_counts_only_dispatched_provider_calls(

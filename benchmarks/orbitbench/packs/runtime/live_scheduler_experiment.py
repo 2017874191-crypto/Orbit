@@ -29,6 +29,7 @@ from ...budget import (
     ProviderBudgetLedger,
     provider_call_budget_scope,
 )
+from ...call_evidence import CallEvidence, EvidenceProvider, evidence_trial
 from ...canonical import canonical_digest, to_primitive
 from ...environment import capture_environment_identity
 from ...schema import ExperimentRef
@@ -145,6 +146,8 @@ class _LiveRecorder:
         self.prompt_tokens = 0
         self.completion_tokens = 0
         self.total_tokens = 0
+        self.call_evidence: CallEvidence | None = None
+        self.arm = ""
 
     def accept(self, request: TurnRequest) -> None:
         self.accepted_ns[_message_id(request)] = time.perf_counter_ns()
@@ -156,6 +159,24 @@ class _LiveRecorder:
         message_id = _message_id(request)
         self.terminal_ns[message_id] = time.perf_counter_ns()
         self.task_failures[message_id] = reason
+        self._write_trial(message_id, None)
+
+    def _write_trial(self, message_id: str, response_text: str | None) -> None:
+        if self.call_evidence is not None:
+            key = canonical_digest({"arm": self.arm, "message_id": message_id})
+            self.call_evidence.write(
+                f"trials/{key}.json",
+                {
+                    "arm": self.arm,
+                    "message_id": message_id,
+                    "final_reply": response_text,
+                    "expected_marker": self.work[message_id].marker,
+                    "verifier_failures": self.task_failures.get(message_id, "").split(",")
+                    if message_id in self.task_failures
+                    else [],
+                    "outcome": self.outcomes.get(message_id),
+                },
+            )
 
     def complete(
         self,
@@ -193,6 +214,7 @@ class _LiveRecorder:
             "tool_failures": outcome.tool_failures,
             "total_tokens": outcome.usage.total_tokens,
         }
+        self._write_trial(message_id, response_text)
 
     def turn_records(self) -> list[dict[str, Any]]:
         origin_ns = min(self.accepted_ns.values()) if self.accepted_ns else 0
@@ -253,15 +275,18 @@ class _LiveMeasuredRunner:
             await emit(event)
 
         try:
-            with provider_call_budget_scope(
-                trial_id=f"{self._arm}:{message_id}",
-                max_logical_calls=self._config.max_logical_calls_per_turn,
-                max_attempts_per_call=self._config.max_attempts_per_call,
-                max_input_tokens_per_call=self._config.max_input_tokens_per_call,
-                max_output_tokens_per_call=self._config.max_output_tokens_per_call,
+            with (
+                evidence_trial(arm=self._arm, message_id=message_id),
+                provider_call_budget_scope(
+                    trial_id=f"{self._arm}:{message_id}",
+                    max_logical_calls=self._config.max_logical_calls_per_turn,
+                    max_attempts_per_call=self._config.max_attempts_per_call,
+                    max_input_tokens_per_call=self._config.max_input_tokens_per_call,
+                    max_output_tokens_per_call=self._config.max_output_tokens_per_call,
+                ),
             ):
                 outcome = await self._delegate.run(req, capture, drain)
-        except Exception as exc:
+        except BaseException as exc:
             self._recorder.fail(req, f"runner_exception:{type(exc).__name__}")
             raise
         self._recorder.complete(req, outcome, "\n".join(response_parts))
@@ -321,6 +346,8 @@ def build_live_scheduler_plan(
             "aggregation": "median_of_paired_repetition_reductions",
             "arm_order": "balanced_alternating",
             "raw_record_schema": LIVE_TURN_RECORD_SCHEMA,
+            "call_evidence_schema": "orbit.call-evidence.v1",
+            "call_evidence_scope": "non_streaming_attempts_with_optional_sdk_capture",
         },
         "analysis": {
             "confidence_interval": "paired_repetition_bootstrap_percentile",
@@ -420,7 +447,8 @@ async def run_live_scheduler_experiment(
         max_tokens=config.max_output_tokens_per_call,
     )
     provider = BudgetGuardedProvider(delegate_provider, ledger=ledger)
-    observed_provider = _ObservedLiveProvider(provider)
+    call_evidence = CallEvidence(root / "call-evidence")
+    observed_provider = _ObservedLiveProvider(EvidenceProvider(provider, call_evidence))
 
     clean_before = _worktree_clean(repository_root)
     environment_before = capture_environment_identity(repository_root)
@@ -439,7 +467,9 @@ async def run_live_scheduler_experiment(
                     base_config=base_config,
                     provider=observed_provider,
                     workspace=root / "state" / f"r{repetition:02d}" / arm,
+                    call_evidence=call_evidence,
                 )
+                call_evidence.require_complete()
             control_p95 = _optional_p95(arms["global_fifo"])
             treatment_p95 = _optional_p95(arms["session_lanes"])
             paired_reduction = (
@@ -457,7 +487,10 @@ async def run_live_scheduler_experiment(
                 }
             )
     finally:
-        await _close_provider(delegate_provider)
+        try:
+            await _close_provider(delegate_provider)
+        finally:
+            call_integrity = call_evidence.finish()
 
     budget = ledger.snapshot()
     clean_after = _worktree_clean(repository_root)
@@ -480,6 +513,7 @@ async def run_live_scheduler_experiment(
     reduction = summary["foreground_p95_reduction_percent"]
     confidence_interval = summary["paired_reduction_ci"]
     gates = {
+        "call_evidence_complete": call_integrity["complete"],
         "all_tasks_verified": all_tasks_verified,
         "all_usage_complete": all(
             arm["total_tokens"] > 0 for pair in pairs for arm in (pair["global_fifo"], pair["session_lanes"])
@@ -512,6 +546,7 @@ async def run_live_scheduler_experiment(
         "repetitions": pairs,
         "summary": summary,
         "budget": to_primitive(budget),
+        "call_evidence": {"relative_root": "call-evidence", "digest": call_integrity["digest"]},
         "gates": gates,
         "claim_eligible": all(gates.values()),
     }
@@ -533,6 +568,7 @@ async def _run_live_arm(
     base_config: Config,
     provider: LLMProvider,
     workspace: Path,
+    call_evidence: CallEvidence | None = None,
 ) -> dict[str, Any]:
     from orbit.cli._runtime_assembly import assemble_runtime
 
@@ -564,6 +600,8 @@ async def _run_live_arm(
         interactive=False,
     )
     recorder = _LiveRecorder(work)
+    recorder.call_evidence = call_evidence
+    recorder.arm = scheduler_kind
     runner = _LiveMeasuredRunner(runtime.agent_loop, recorder, config, scheduler_kind)
     if scheduler_kind == "global_fifo":
         scheduler: Any = _GlobalFifoScheduler(runner, config.user_slots)

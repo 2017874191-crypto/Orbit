@@ -8,6 +8,7 @@ carries (or drops) edits the designer never verified.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -35,12 +36,17 @@ def subject(tmp_path: Path) -> tuple[Path, str]:
     (repo / "benchmarks/appworld").mkdir(parents=True)
     (repo / "benchmarks/__init__.py").touch()
     (repo / "benchmarks/appworld/__init__.py").touch()
-    (repo / "benchmarks/appworld/agent_cli.py").write_text("PROMPT = 'v1'\n")
-    (repo / "benchmarks/appworld/tool.py").write_text("VALUE = 1\n")
+    (repo / "benchmarks/appworld/agent_cli.py").write_text("PROMPT = 'v1'\n", newline="\n")
+    (repo / "benchmarks/appworld/tool.py").write_text("VALUE = 1\n", newline="\n")
     (repo / "orbit/agent").mkdir(parents=True)
     (repo / "orbit/agent/loop.py").write_text("x = 1\n")
     (repo / "grader.py").write_text("score = 1\n")
-    for cmd in (["git", "init", "-q"], ["git", "add", "-A"], ["git", "commit", "-qm", "init"]):
+    for cmd in (
+        ["git", "init", "-q"],
+        ["git", "config", "core.autocrlf", "false"],
+        ["git", "add", "-A"],
+        ["git", "commit", "-qm", "init"],
+    ):
         subprocess.run(cmd, cwd=repo, check=True, env=_ENV, capture_output=True)
     sha = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=repo, check=True, capture_output=True, text=True, env=_ENV
@@ -75,6 +81,7 @@ class TestWriteRefusal:
         assert "refused" in msg
 
 
+@pytest.mark.skipif(os.name == "nt", reason="AppWorld evolution driver requires a POSIX bash runtime")
 class TestBashBoundary:
     def test_command_naming_origin_repo_is_refused(self, sandbox):
         out = sandbox.bash(f"cat {sandbox.repo_root.resolve()}/grader.py")

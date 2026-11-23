@@ -6,7 +6,7 @@ Watcher 监控 Workspace Skill Tree；``SKILL.md`` Add/Change/Disappear 时按 S
 Invalidation Hook。Watcher Roots 通过 ``__init__`` 传入。
 
 Design Notes：使用运行 ``watchfiles.watch()`` 的 **Daemon Thread**，Rust Iterator 默认约 1.6s Debounce；
-Daemon 在 Process Exit 自动清理，显式 :meth:`stop` 用于 Tests/Clean Shutdown。Scope 刻意 Workspace-only，
+Daemon 在 Process Exit 由 atexit 清理，显式 :meth:`stop` 用于 Tests/Clean Shutdown。Scope 刻意 Workspace-only，
 Builtin/External 是 Read-only Mirrors，Builtin 约可达 80K Files，Recursive Watch 会超过 Linux
 ``fs.inotify.max_user_watches``。``watchfiles`` 缺失时 Defensive `ImportError` 降级 Manual Invalidation。
 Start/Stop 与 Thread 内 Error 都是 **Best-effort**，失败返回 ``False`` 或记录后不让 Runtime 崩溃。
@@ -14,12 +14,26 @@ Start/Stop 与 Thread 内 Error 都是 **Best-effort**，失败返回 ``False`` 
 
 from __future__ import annotations
 
+import atexit
 import logging
 import threading
+import weakref
 from collections.abc import Callable, Iterable
 from pathlib import Path, PurePath
 
 log = logging.getLogger(__name__)
+_active_watchers: weakref.WeakSet[SkillFileWatcher] = weakref.WeakSet()
+_active_watchers_lock = threading.Lock()
+
+
+def _stop_active_watchers() -> None:
+    with _active_watchers_lock:
+        watchers = tuple(_active_watchers)
+    for watcher in watchers:
+        watcher.stop(timeout=5.0)
+
+
+atexit.register(_stop_active_watchers)
 
 
 def _is_skill_md(_change, path: str) -> bool:
@@ -83,6 +97,8 @@ class SkillFileWatcher:
             daemon=True,
         )
         self._thread.start()
+        with _active_watchers_lock:
+            _active_watchers.add(self)
         log.debug(
             "SkillFileWatcher started on %d root(s): %s",
             len(self._roots),
@@ -100,7 +116,10 @@ class SkillFileWatcher:
         thread = self._thread
         if thread is not None and thread.is_alive():
             thread.join(timeout=timeout)
-        self._thread = None
+        if thread is None or not thread.is_alive():
+            self._thread = None
+            with _active_watchers_lock:
+                _active_watchers.discard(self)
 
     # ------------------------------------------------------------------
 

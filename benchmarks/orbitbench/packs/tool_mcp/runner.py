@@ -12,6 +12,7 @@ from unittest.mock import patch
 from benchmarks.orbitbench.budget import (
     _conservative_serialized_input_tokens,
 )
+from benchmarks.orbitbench.call_evidence import evidence_logical_call
 from benchmarks.orbitbench.canonical import (
     canonical_digest,
     to_primitive,
@@ -28,6 +29,12 @@ from benchmarks.orbitbench.records import (
     TrialStatus,
     TurnTerminalState,
     VerificationState,
+)
+from benchmarks.orbitbench.trial_evidence import (
+    capture_observation,
+    capture_workspace_file,
+    observed_provider,
+    recorded_trial,
 )
 from orbit.agent.tools.mcp import connect_mcp_servers
 from orbit.agent.tools.registry import ToolRegistry
@@ -155,6 +162,10 @@ class _ScriptedToolMCPProvider(LLMProvider):
 
 class _RecordingToolMCPProvider(LLMProvider):
     _CHAT_RETRY_DELAYS = (0,)
+
+    async def chat_with_retry(self, **kwargs) -> LLMResponse:
+        with evidence_logical_call():
+            return await super().chat_with_retry(**kwargs)
 
     def __init__(
         self,
@@ -337,12 +348,14 @@ class DeterministicMCPTrialRunner:
         )
 
 
+@recorded_trial
 async def _run_runtime_trial(
     *,
     context: TrialContext,
     task: ToolMCPTask,
     provider: _RecordingToolMCPProvider,
 ) -> TrialExecution:
+    provider.delegate = observed_provider(provider.delegate)
     disclosure = str(context.variant.settings["tool_disclosure"])
     isolation_root = context.experiment.output_root / ".orbitbench-tool-mcp" / context.experiment_id
     attempt_id = f"{task.task_id}-{context.variant.variant_id}-r{context.key.repetition}-b{context.block_attempt}"
@@ -383,6 +396,8 @@ async def _run_runtime_trial(
         finally:
             await host.close()
     latency_ms = (time.perf_counter() - started) * 1_000
+    capture_observation(observation)
+    capture_workspace_file(isolation.evidence_root, "receipts.jsonl", name="mcp-receipts")
 
     verification, receipts = verifier.verify(receipt_path)
     catalog_names = frozenset(definition["function"]["name"] for definition in catalog_payloads)

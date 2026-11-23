@@ -323,6 +323,7 @@ async def _run_stage(
         }
     if process.returncode != 0:
         result["status"] = "infrastructure_failure"
+        result.setdefault("error_type", f"worker_exit_{process.returncode}")
     return result
 
 

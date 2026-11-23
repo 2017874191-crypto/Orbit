@@ -41,6 +41,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="Unix domain sockets unavailable")
+
 from orbit.tui_rpc.dispatcher import Dispatcher
 from orbit.tui_rpc.methods import register_aligned_methods
 from orbit.tui_rpc.server import RpcServer

@@ -130,3 +130,39 @@ passes, so the aggregate artifact records `claim_eligible: false`. Resume and
 public wording must report the 99.95% Verifier pass rate and must not say that
 every task passed. The raw-record verifier independently reproduces the P95
 reduction, confidence interval, usage totals, and request-integrity counts.
+
+## Local call evidence for new runs
+
+New live runs retain `call-evidence/` beside the budget ledger. Every
+non-streaming attempt stores requested parameters, normalized response,
+reported model, finish reason, usage, duration, logical call identity and arm /
+message identity. Budget reservations are linked by ID. Trial records retain
+the final reply, expected marker and verifier failures. Retries are separate
+attempts; a missing terminal record makes the bundle incomplete.
+
+The LiteLLM adapter additionally captures selected post-conversion parameters
+and SDK response fields (`id`, `model`, `choices`, `usage`). Authentication,
+headers, API base and provider-specific extra bodies are excluded. These are
+SDK-level observations, not raw HTTP evidence or proof of the server's model
+version. Other adapters currently retain normalized responses only.
+
+Verify the JSON integrity manifest and export calls from failed Trials offline:
+
+```bash
+uv run --frozen python -m benchmarks.orbitbench.call_evidence /absolute/path/to/call-evidence
+```
+
+The command prints each failed Trial's arm, message identity, finish reason,
+usage, requested output limit and response path. Reaching the token limit is
+not by itself proof of truncation. Interpret it with the SDK finish reason and
+the reply. No model call is made by this command.
+
+Recording failures block further observed dispatches and invalidate evidence;
+they do not authorize another paid request. The collector is in-process and
+the workspace tools are disabled in this experiment. This is local diagnostic
+recording, not protection against arbitrary same-user code. Evidence contains
+task text and replies: restrict filesystem access and do not publish it without
+review. Hashes detect accidental modification, not a writer able to replace
+both data and hashes. No historical missing responses are recovered by this
+change. End-to-end latency includes recording overhead in both arms; comparisons
+with historical uninstrumented runs require a new measurement baseline.

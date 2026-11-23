@@ -2163,7 +2163,7 @@ def test_makefile_exposes_checkout_only_smoke_and_ship_targets() -> None:
 
     assert "orbitbench-smoke:" in makefile
     assert "orbitbench:" in makefile
-    assert ("uv run --frozen --all-extras --exact python -m benchmarks.orbitbench --mode smoke") in makefile
+    assert ("uv run --frozen $(VERIFY_EXTRAS) --exact python -m benchmarks.orbitbench --mode smoke") in makefile
     assert ("uv run --frozen --all-extras --exact python -m benchmarks.orbitbench --mode ship") in makefile
 
 

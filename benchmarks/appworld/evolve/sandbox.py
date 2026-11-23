@@ -127,7 +127,7 @@ class Sandbox:
             )
         p = self.root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(content)
+        p.write_text(content, newline="\n")
         return f"[wrote {rel} ({len(content)} chars)]"
 
     def scope_restore(self) -> list[str]:

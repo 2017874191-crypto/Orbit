@@ -1696,7 +1696,10 @@ class AgentLoop:
             tasks = tuple(self._personalization_tasks)
             if tasks:
                 await asyncio.gather(*tasks, return_exceptions=True)
-            await self.close_mcp()
+            try:
+                await self.close_mcp()
+            finally:
+                await asyncio.to_thread(self.context.skills.stop_file_watcher)
             self._closed = True
 
     def stop(self) -> None:

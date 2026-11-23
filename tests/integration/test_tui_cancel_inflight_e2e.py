@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="Unix domain sockets unavailable")
+
 from orbit.spine import StreamDelta, TurnOutcome, Usage
 from orbit.tui_rpc.dispatcher import Dispatcher
 from orbit.tui_rpc.methods.turn import clear_active, register_turn_methods

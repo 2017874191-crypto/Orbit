@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+from benchmarks.orbitbench.call_evidence import verify_bundle
 from benchmarks.orbitbench.campaign import (
     DEFAULT_SUITE_PATH,
     load_campaign_suite,
@@ -150,6 +152,9 @@ async def test_formal_task_runs_both_variants_through_runtime_host(
     control = executions["tool-mcp-all-tools"]
     treatment = executions["tool-mcp-progressive"]
     for execution in executions.values():
+        evidence_root = tmp_path / execution.artifact_refs[-1]
+        assert verify_bundle(evidence_root)["passed"]
+        assert json.loads((evidence_root / "artifacts/mcp-receipts.json").read_text("utf-8"))["status"] == "captured"
         assert execution.status is TrialStatus.PASSED
         assert execution.verification.state is VerificationState.PASSED
         assert execution.metrics["mcp_transport"] == "stdio"

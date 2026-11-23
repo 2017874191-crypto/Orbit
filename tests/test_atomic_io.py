@@ -186,7 +186,7 @@ def test_generation_read_propagates_non_missing_os_error(tmp_path: Path):
     epoch_path = tmp_path / ".generation" / "blocked.jsonl.epoch"
     epoch_path.mkdir(parents=True)
 
-    with pytest.raises(IsADirectoryError):
+    with pytest.raises(OSError):
         locked_append(path, ["late"], expected_epoch=0)
 
     assert not path.exists()

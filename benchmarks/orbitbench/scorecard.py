@@ -161,6 +161,7 @@ def _formal_inputs(
     summary_path: Path,
     *,
     orbit_commit: str,
+    campaign_suite: str = "agent-application-scorecard-v1",
 ) -> Mapping[str, Any]:
     summary = _read_json(summary_path)
     manifest_path = summary_path.with_name("manifest.json")
@@ -176,7 +177,7 @@ def _formal_inputs(
     if (
         not isinstance(identity, Mapping)
         or identity.get("orbit_commit") != orbit_commit
-        or identity.get("campaign_suite") != "agent-application-scorecard-v1"
+        or identity.get("campaign_suite") != campaign_suite
         or identity.get("campaign_mode") != "formal"
     ):
         raise ValueError("formal summary does not match the current Scorecard subject")
@@ -207,6 +208,12 @@ def main() -> int:
         description="Compute the OrbitBench multidimensional diagnostic score.",
     )
     parser.add_argument("--formal-summary", required=True, type=Path)
+    parser.add_argument(
+        "--campaign-suite",
+        choices=("agent-application-scorecard-v1", "agent-application-scorecard-v2"),
+        default="agent-application-scorecard-v1",
+        help="Expected formal campaign identity (defaults to the historical v1 suite)",
+    )
     parser.add_argument("--runtime-evidence", type=Path)
     parser.add_argument("--tokenwise-report", type=Path)
     parser.add_argument(
@@ -218,6 +225,7 @@ def main() -> int:
     formal_summary = _formal_inputs(
         args.formal_summary,
         orbit_commit=current_commit,
+        campaign_suite=args.campaign_suite,
     )
     runtime = _read_json(args.runtime_evidence) if args.runtime_evidence else {}
     runtime_current = False

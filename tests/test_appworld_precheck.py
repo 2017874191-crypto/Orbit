@@ -8,6 +8,7 @@ that text.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -164,6 +165,7 @@ class TestEndpointProblem:
         assert "degraded" in problem and "tok/s floor" in problem
 
 
+@pytest.mark.skipif(os.name == "nt", reason="AppWorld runtime fixture uses POSIX executable bits and shell scripts")
 class TestAppWorldRuntime:
     def _config(self, tmp_path, *, python_script: str = "#!/bin/sh\nexit 0\n"):
         data_root = tmp_path / "appworld"

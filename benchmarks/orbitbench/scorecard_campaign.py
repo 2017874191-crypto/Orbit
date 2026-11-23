@@ -211,13 +211,19 @@ def main() -> int:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=Path(".orbit") / "evidence" / "orbitbench-scorecard-v1",
+        help="Evidence directory (required for a non-default suite)",
+    )
+    parser.add_argument(
+        "--suite",
+        type=Path,
+        default=DEFAULT_SCORECARD_SUITE_PATH,
+        help="Campaign suite YAML (defaults to the frozen v1 suite)",
     )
     parser.add_argument("--runtime-evidence", type=Path)
     args = parser.parse_args()
     try:
         if args.action == "estimate":
-            suite = load_campaign_suite(DEFAULT_SCORECARD_SUITE_PATH)
+            suite = load_campaign_suite(args.suite)
             estimate = estimate_worst_case_cost(
                 suite,
                 modes=(
@@ -233,11 +239,15 @@ def main() -> int:
                 )
             )
             return 0
+        if args.output_root is None and args.suite.resolve() != DEFAULT_SCORECARD_SUITE_PATH.resolve():
+            parser.error("--output-root is required when --suite selects a non-default suite")
+        output_root = args.output_root or Path(".orbit") / "evidence" / "orbitbench-scorecard-v1"
         outcome = asyncio.run(
             run_scorecard_campaign(
                 CampaignMode.SHIP,
-                output_root=args.output_root,
+                output_root=output_root,
                 runtime_evidence=args.runtime_evidence,
+                suite_path=args.suite,
             )
         )
     except CampaignError as exc:

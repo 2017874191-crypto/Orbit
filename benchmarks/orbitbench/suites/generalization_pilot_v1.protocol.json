@@ -1,0 +1,59 @@
+{
+  "schema": "orbit.generalization-pilot-proposal.v1",
+  "status": "draft_not_executable_campaign_config",
+  "purpose": "small_exploratory_generalization_check",
+  "paid_execution_authorized": false,
+  "capability_claim_eligible": false,
+  "tracks": ["context", "tool-mcp"],
+  "strata": ["new_entities_and_values", "semantic_rephrase_and_order", "longer_history_or_tool_distractors"],
+  "pairs_per_track_per_stratum": 2,
+  "cases_per_pair": 2,
+  "arms_per_track": 2,
+  "repetitions": 1,
+  "derived_task_cases": 24,
+  "derived_trials": 48,
+  "pair_semantics": "both cases are legitimate tasks; the counterfactual changes the correct outcome; neither is an intentionally wrong model response",
+  "split_policy": {
+    "public_existing_formal": "development_regression_only",
+    "development_mutations": "visible_to_development; do_not_claim_holdout_independence",
+    "private_validation": "new_task_families_from_independent_custodian",
+    "final_holdout": "separate_storage_and_principal; no_agent_or_developer_read_access; consume_on_first_dispatch; retire_after_exposure",
+    "grouping": "keep_base_task_family_and_all_mutations_in_one_split",
+    "no_shared_workspace_holdout_generation": true
+  },
+  "preregistration": {
+    "before_dispatch": ["candidate_subject", "baseline_subject", "task_family_manifest_commitment", "model_and_generation_parameters", "verifier_versions", "resource_and_budget_caps", "arm_order_and_seed_commitment", "expected_trial_list", "failure_and_retry_policy"],
+    "private_inputs_and_expected_outputs": "custodian_only; send_current_task_input_to_worker; expected_outputs_stay_in_grader_domain",
+    "feedback": "aggregate_after_batch; no_adaptive_rerun_on_same_holdout"
+  },
+  "comparison": {
+    "context": ["context-fifo", "context-curator"],
+    "tool-mcp": ["tool-mcp-all-tools", "tool-mcp-progressive"],
+    "primary": "first_attempt_strict_task_success_on_all_planned_tasks",
+    "secondary": ["failure_types", "truncation_and_usage_coverage", "all_attempt_cost_per_success", "latency_with_coverage"],
+    "pairing": "same_task_in_both_arms; balanced_random_order; never_pick_best_attempt",
+    "family_independence": "mutations_and_polarities_do_not_increase_independent_sample_count"
+  },
+  "signals": {
+    "rules": "required_for_every_trial",
+    "human_review": "all_failed_or_anomalous_trials_plus_20_percent_normal_per_arm_rounded_up; record_actual_sampling_probability",
+    "llm_judge": "optional_for_open_ended_tasks_only; separately_budgeted_and_calibrated; not_required_for_exact_json_or_receipt_tasks"
+  },
+  "decision_rules": {
+    "confirmed_test_or_log_tampering_or_unauthorized_access": "stop_and_review; no_certification",
+    "evidence_integrity_failure": "abort; no_paid_retry",
+    "unexplained_arm_quality_regression": "investigate_before_efficiency_claim",
+    "matched_distribution_dev_private_gap_warning_percentage_points": 10,
+    "warning_scope": "exploratory_alert_not_a_statistical_rejection_threshold",
+    "quality_noninferiority": "not_established_by_this_small_pilot; requires_separate_powered_preregistered_experiment",
+    "statistical_reporting": "raw_counts_by_track_and_stratum; descriptive_family_paired_differences; no_population_guarantees"
+  },
+  "before_any_live_run": [
+    "complete_human_review_of_offline_acceptance",
+    "validate_mutation_semantics_with_rules_and_independent_review",
+    "implement_private_task_loading_without_exposing_oracles",
+    "demonstrate_storage_and_permission_separation",
+    "freeze_clean_candidate_and_rerun_linux_gate",
+    "refresh_provider_identity_and_prices_and_obtain_explicit_budget_authorization"
+  ]
+}

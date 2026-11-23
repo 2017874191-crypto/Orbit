@@ -1,5 +1,12 @@
 .PHONY: help install install-deps format check check-public-tree lint lint-python lint-tui test test-python test-retained test-tui orbitbench-smoke orbitbench orbitbench-reproduce orbitbench-scorecard-estimate orbitbench-scorecard-ship orbitbench-scorecard-score orbitbench-runtime-scheduler orbitbench-runtime-tools orbitbench-runtime-live-plan orbitbench-runtime-live-run orbitbench-runtime-live-verify orbitbench-call-efficiency-plan orbitbench-call-efficiency-preflight orbitbench-call-efficiency-run orbitbench-call-efficiency-verify orbitbench-tracing-plan orbitbench-tracing-run orbitbench-tracing-verify verify-channels verify-evolver verify-turn-evidence build build-tui release-dist check-commits check-pr-title check-large-files ci clean
 
+# BoxLite has no Windows wheel; local deterministic gates do not require a VM.
+ifeq ($(OS),Windows_NT)
+VERIFY_EXTRAS := --extra dev --extra tools --extra channels
+else
+VERIFY_EXTRAS := --all-extras
+endif
+
 PYTHON ?= python3
 PYTHON_LINT_TARGETS ?= scripts/check_commit_file.py scripts/check_commit_messages.py scripts/check_pr_title.py scripts/check_large_files.py scripts/commit_lint.py tests/test_commit_lint.py tests/test_large_file_check.py
 COMMIT_RANGE ?= origin/main..HEAD
@@ -81,10 +88,10 @@ test-python:
 	uv run --extra dev pytest tests/test_commit_lint.py tests/test_large_file_check.py tests/test_cli_smoke.py tests/test_litellm_setup.py -q
 
 test-retained: build-tui
-	uv run --frozen --all-extras --exact pytest tests -q --strict-markers -m 'not (real_llm or llm_judge or real_vm or real_channel or external_runtime or e2e)'
+	uv run --frozen $(VERIFY_EXTRAS) --exact pytest tests -q --strict-markers -m 'not (real_llm or llm_judge or real_vm or real_channel or external_runtime or e2e)'
 
 orbitbench-smoke:
-	uv run --frozen --all-extras --exact python -m benchmarks.orbitbench --mode smoke
+	uv run --frozen $(VERIFY_EXTRAS) --exact python -m benchmarks.orbitbench --mode smoke
 
 orbitbench:
 	uv run --frozen --all-extras --exact python -m benchmarks.orbitbench --mode ship
